@@ -1,0 +1,35 @@
+# Render deployment manifest
+# Fix #6: Added rootDir: backend so Render runs commands from the correct subdirectory.
+# Fix #7: Added healthCheckPath so Render can verify the service is alive.
+#
+# Docs: https://render.com/docs/render-yaml-reference
+
+services:
+  - type: web
+    name: ai-email-checker-backend
+    env: python
+    region: oregon
+    plan: free
+
+    # Fix #6: Without rootDir, Render looks for requirements.txt at the repo root
+    # and fails with "file not found". Must point to backend/ subdirectory.
+    rootDir: backend
+
+    buildCommand: pip install -r requirements.txt
+
+    # Render injects $PORT — do NOT hardcode a port number
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+
+    # Fix #7: Render uses this path to determine if the service is healthy.
+    # Without it, Render marks the service as crashed even when it is running.
+    healthCheckPath: /health
+
+    envVars:
+      - key: OPENAI_API_KEY
+        sync: false          # Must be set manually in the Render dashboard
+
+      - key: MODEL_NAME
+        value: gpt-4o-mini   # Can be overridden in dashboard if needed
+
+      - key: ALLOWED_ORIGINS
+        sync: false          # Set to your Vercel frontend URL in the dashboard

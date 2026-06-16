@@ -1,0 +1,22 @@
+# Fix #10: All packages pinned to exact versions to prevent random breakage
+# on Render rebuilds due to upstream version changes.
+#
+# Core
+fastapi==0.111.0
+uvicorn[standard]==0.30.1
+
+# OpenAI — Fix #3: SDK v1.x required; v0.x used the deprecated ChatCompletion.create()
+openai==1.35.3
+
+# Pydantic — Fix #2: pydantic-settings is a SEPARATE package from pydantic v2
+pydantic==2.7.4
+pydantic-settings==2.3.4
+
+# HTTP client used internally by openai SDK
+httpx==0.27.0
+
+# Environment variable loading
+python-dotenv==1.0.1
+
+# Async support
+anyio==4.4.0
