@@ -66,67 +66,6 @@ ai-email-content-checker/
 
 ---
 
-## Local Development Setup
-
-### 1. Clone and enter the project
-
-```bash
-git clone https://github.com/your-username/ai-email-content-checker.git
-cd ai-email-content-checker
-```
-
-### 2. Backend setup
-
-```bash
-cd backend
-
-# Create and activate virtual environment
-python -m venv venv
-
-# Windows:
-venv\Scripts\activate
-# macOS/Linux:
-source venv/bin/activate
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Configure environment variables
-cp .env.example .env
-# Edit .env and set your OPENAI_API_KEY
-```
-
-### 3. Run the backend
-
-```bash
-# From inside the backend/ directory (with venv active)
-uvicorn app.main:app --reload --port 8000
-```
-
-API is now running at: http://localhost:8000  
-Swagger docs: http://localhost:8000/docs
-
-### 4. Frontend setup
-
-```bash
-# In a new terminal, from the project root:
-cd frontend
-npm install
-
-# Configure environment variables
-cp .env.example .env
-# .env already has: VITE_API_URL=http://localhost:8000
-```
-
-### 5. Run the frontend
-
-```bash
-npm run dev
-```
-
-App is now running at: http://localhost:5173
-
----
 
 ## Environment Variables
 
@@ -187,24 +126,7 @@ App is now running at: http://localhost:5173
 
 ### Backend → Render
 
-1. Push your code to GitHub
-2. Go to [render.com](https://render.com) → **New** → **Blueprint**
-3. Connect your GitHub repository
-4. Render will detect `render.yaml` automatically
-5. In the Render dashboard, set the following environment variables as **Secret**:
-   - `OPENAI_API_KEY` — your OpenAI key
-   - `ALLOWED_ORIGINS` — your Vercel frontend URL (e.g., `https://my-app.vercel.app`)
-6. Deploy — the service will be live at `https://your-service.onrender.com`
-
 ### Frontend → Vercel
-
-1. Go to [vercel.com](https://vercel.com) → **New Project**
-2. Import your GitHub repository
-3. Set **Root Directory** to `frontend`
-4. Vercel detects Vite automatically via `vercel.json`
-5. Add environment variable:
-   - `VITE_API_URL` = `https://your-service.onrender.com`
-6. Deploy
 
 ### Post-deployment: Update CORS
 
@@ -215,24 +137,3 @@ After deploying both services:
 4. Render will automatically redeploy
 
 ---
-
-## Build for Production
-
-```bash
-# Frontend production build
-cd frontend
-npm run build
-# Output in frontend/dist/
-```
-
----
-
-## Key Architecture Decisions
-
-| Decision | Reason |
-|----------|--------|
-| `asyncio.gather()` with `return_exceptions=True` | Grammar + subject calls run in parallel, cutting response time ~50% |
-| `response_format={"type":"json_object"}` | Forces GPT to return valid JSON — eliminates parse failures |
-| Module-level `AsyncOpenAI` singleton | Prevents connection pool exhaustion from creating new clients per request |
-| `pydantic-settings` | Type-safe, validated config from `.env` with zero boilerplate |
-| Lifespan context manager | FastAPI ≥ 0.93 modern startup/shutdown pattern |
