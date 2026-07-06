@@ -1,11 +1,5 @@
-/**
- * App.jsx — Root component
- *
- * Fix #17: onError now accepts null to clear the error state, so that
- * submitting a new request always starts from a clean slate.
- */
-
-import React, { useState } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import EmailForm from './components/EmailForm.jsx'
 import ResultsPanel from './components/ResultsPanel.jsx'
 
@@ -13,26 +7,76 @@ import ResultsPanel from './components/ResultsPanel.jsx'
 // Header component
 // ---------------------------------------------------------------------------
 function Header() {
+  const [dropdownOpen, setDropdownOpen] = useState(false)
+  const dropdownRef = useRef(null)
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setDropdownOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
   return (
-    <header className="sticky top-0 z-20 border-b border-slate-700/40 bg-slate-900/80 backdrop-blur-md">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
-        {/* Logo */}
+    <header className="sticky top-0 z-30 h-[72px] premium-navbar shadow-sm">
+      <div className="max-w-[1200px] h-full mx-auto px-4 sm:px-6 flex items-center justify-between">
+        {/* Logo and Brand */}
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/30">
-            <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-400 to-indigo-400 flex items-center justify-center shadow-md shadow-violet-200">
+            <svg className="w-5.5 h-5.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
             </svg>
           </div>
-          <div>
-            <p className="text-white font-bold text-lg leading-none tracking-tight">EmailIQ</p>
-            <p className="text-slate-400 text-xs leading-none mt-0.5">AI Email Content Checker</p>
+          <div className="flex flex-col">
+            <span className="text-slate-800 font-bold text-lg leading-none tracking-tight">EmailIQ</span>
+            <span className="text-slate-400 text-[10px] uppercase font-semibold tracking-wider mt-0.5">AI Content Checker</span>
           </div>
         </div>
 
-        {/* Status badge */}
-        <div className="hidden sm:flex items-center gap-2 bg-slate-800/60 border border-slate-700/40 rounded-full px-3.5 py-1.5">
-          <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.8)] animate-pulse" />
-          <span className="text-slate-400 text-xs">GPT-4o-mini</span>
+        {/* User Profile Avatar with Dropdown */}
+        <div className="relative" ref={dropdownRef}>
+          <button
+            onClick={() => setDropdownOpen(!dropdownOpen)}
+            className="flex items-center gap-2 p-1.5 rounded-full hover:bg-slate-100 transition-all duration-200 focus:outline-none border border-transparent hover:border-slate-200"
+            aria-label="User menu"
+          >
+            <div className="w-8 h-8 rounded-full bg-violet-100 border border-violet-200 flex items-center justify-center text-violet-600 font-bold text-sm select-none">
+              RK
+            </div>
+            <svg className="w-4 h-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+
+          <AnimatePresence>
+            {dropdownOpen && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 10 }}
+                transition={{ duration: 0.15 }}
+                className="absolute right-0 mt-2 w-48 bg-white border border-slate-200 rounded-xl shadow-lg py-1.5 z-40"
+              >
+                <div className="px-4 py-2 border-b border-slate-100">
+                  <p className="text-xs text-slate-400">Signed in as</p>
+                  <p className="text-sm font-semibold text-slate-700 truncate">riddhi@intern.tsl</p>
+                </div>
+                <button className="w-full text-left px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 transition-colors">
+                  Profile
+                </button>
+                <button className="w-full text-left px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 transition-colors">
+                  Settings
+                </button>
+                <div className="border-t border-slate-100 my-1"></div>
+                <button className="w-full text-left px-4 py-2 text-sm text-rose-600 hover:bg-rose-50/50 transition-colors">
+                  Logout
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </header>
@@ -44,37 +88,27 @@ function Header() {
 // ---------------------------------------------------------------------------
 function Hero() {
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-14 pb-10 text-center">
-      {/* Phase badge */}
-      <div className="inline-flex items-center gap-2 bg-indigo-500/10 border border-indigo-500/20 rounded-full px-4 py-1.5 text-indigo-400 text-xs font-semibold mb-6 tracking-wide uppercase">
-        <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
-          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-        </svg>
-        Phase 1 · Grammar & Subject Analysis
-      </div>
-
-      <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-white mb-5 leading-tight tracking-tight">
-        Write emails that{' '}
-        <span className="gradient-text">actually land</span>
+    <div className="max-w-[1200px] mx-auto px-4 sm:px-6 pt-10 pb-8 text-center animate-fade-in">
+      <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-slate-800 mb-3 tracking-tight">
+        Write better emails with <span className="gradient-text">AI</span>
       </h1>
 
-      <p className="text-slate-400 text-lg sm:text-xl max-w-2xl mx-auto leading-relaxed">
-        Paste your draft below. Our AI will fix every grammar mistake and craft
-        three high-impact subject lines — in seconds.
+      <p className="text-slate-500 text-base sm:text-lg max-w-xl mx-auto leading-relaxed">
+        Improve grammar, polish tone, and generate better subject lines in seconds.
       </p>
 
       {/* Feature pills */}
-      <div className="flex flex-wrap items-center justify-center gap-3 mt-8">
+      <div className="flex flex-wrap items-center justify-center gap-2 mt-5">
         {[
-          { icon: '✦', label: 'Grammar Correction' },
-          { icon: '◈', label: 'Issue Detection' },
-          { icon: '⚡', label: 'Subject Optimization' },
-        ].map(({ icon, label }) => (
+          { icon: '✦', label: 'Grammar Correction', bg: 'bg-violet-50 text-violet-600 border-violet-100' },
+          { icon: '⚡', label: 'Tone Improvement', bg: 'bg-emerald-50 text-emerald-600 border-emerald-100' },
+          { icon: '◈', label: 'Subject Suggestions', bg: 'bg-blue-50 text-blue-600 border-blue-100' },
+        ].map(({ icon, label, bg }) => (
           <span
             key={label}
-            className="flex items-center gap-1.5 bg-slate-800/60 border border-slate-700/40 text-slate-300 text-xs font-medium px-3.5 py-1.5 rounded-full"
+            className={`flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-full border ${bg}`}
           >
-            <span className="text-indigo-400">{icon}</span>
+            <span>{icon}</span>
             {label}
           </span>
         ))}
@@ -91,7 +125,6 @@ function App() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
 
-  // Fix #17: Accept null to explicitly clear the error state
   const handleError = (message) => {
     setError(message)
     if (message !== null) setResults(null)
@@ -108,22 +141,18 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0c1120]">
-      {/* Ambient background glow */}
-      <div
-        aria-hidden="true"
-        className="fixed inset-0 pointer-events-none overflow-hidden"
-      >
-        <div className="absolute -top-40 -left-40 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl" />
-        <div className="absolute -top-20 right-0 w-80 h-80 bg-purple-600/8 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[600px] h-64 bg-indigo-900/20 rounded-full blur-3xl" />
+    <div className="min-h-screen bg-[#F8FAFC]">
+      {/* Decorative ambient background spots */}
+      <div aria-hidden="true" className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+        <div className="absolute top-10 left-10 w-[350px] h-[350px] bg-violet-200/25 rounded-full blur-3xl" />
+        <div className="absolute top-40 right-10 w-[300px] h-[300px] bg-indigo-200/25 rounded-full blur-3xl" />
       </div>
 
       <div className="relative z-10">
         <Header />
         <Hero />
 
-        <main className="max-w-6xl mx-auto px-4 sm:px-6 pb-20">
+        <main className="max-w-[1200px] mx-auto px-4 sm:px-6 pb-20">
           <EmailForm
             onResults={handleResults}
             onError={handleError}
@@ -133,33 +162,48 @@ function App() {
             hasResults={!!results}
           />
 
-          {/* Error banner */}
-          {error && (
-            <div className="mt-5 p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-start gap-3 animate-slide-up">
-              <div className="w-8 h-8 rounded-lg bg-rose-500/20 flex items-center justify-center flex-shrink-0">
-                <svg className="w-4 h-4 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <div>
-                <p className="text-rose-400 font-semibold text-sm">Analysis Failed</p>
-                <p className="text-rose-300/70 text-sm mt-0.5">{error}</p>
-              </div>
-            </div>
-          )}
+          {/* Error banner using Framer Motion */}
+          <AnimatePresence>
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 15 }}
+                className="mt-6 p-4 rounded-2xl bg-rose-50 border border-rose-100 flex items-start gap-3 shadow-sm max-w-3xl mx-auto"
+              >
+                <div className="w-8 h-8 rounded-xl bg-rose-100 flex items-center justify-center flex-shrink-0">
+                  <svg className="w-4 h-4 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-rose-700 font-bold text-sm">Analysis Failed</p>
+                  <p className="text-rose-600/80 text-sm mt-0.5">{error}</p>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
-          {/* Results section */}
-          {results && (
-            <div className="mt-8">
-              <ResultsPanel results={results} />
-            </div>
-          )}
+          {/* Results section using AnimatePresence */}
+          <AnimatePresence>
+            {results && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 20 }}
+                transition={{ duration: 0.4, cubicBezier: [0.16, 1, 0.3, 1] }}
+                className="mt-12"
+              >
+                <ResultsPanel results={results} />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </main>
 
         {/* Footer */}
-        <footer className="border-t border-slate-800/60 py-8 text-center">
-          <p className="text-slate-600 text-sm">
-            EmailIQ · AI Email Content Checker · Phase 1 · Powered by GPT-4o-mini
+        <footer className="border-t border-slate-200 py-8 text-center bg-white">
+          <p className="text-slate-400 text-xs font-medium">
+            EmailIQ · AI Email Content Checker · Phase 1 · Powered by Google Gemini 2.5 Flash
           </p>
         </footer>
       </div>
