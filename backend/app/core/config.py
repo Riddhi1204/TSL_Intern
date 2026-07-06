@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     )
 
     openai_api_key: str
+    openai_api_base: str | None = None
     model_name: str = "gpt-4o-mini"
     # Comma-separated list of allowed CORS origins
     allowed_origins: str = "http://localhost:5173,http://localhost:3000"

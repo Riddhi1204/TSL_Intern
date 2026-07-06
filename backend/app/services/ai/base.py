@@ -18,5 +18,8 @@ def get_openai_client() -> AsyncOpenAI:
     global _client
     if _client is None:
         settings = get_settings()
-        _client = AsyncOpenAI(api_key=settings.openai_api_key)
+        kwargs = {"api_key": settings.openai_api_key}
+        if settings.openai_api_base:
+            kwargs["base_url"] = settings.openai_api_base
+        _client = AsyncOpenAI(**kwargs)
     return _client
