@@ -18,8 +18,17 @@ def get_openai_client() -> AsyncOpenAI:
     global _client
     if _client is None:
         settings = get_settings()
-        kwargs = {"api_key": settings.openai_api_key}
-        if settings.openai_api_base:
-            kwargs["base_url"] = settings.openai_api_base
+        api_key = settings.gemini_api_key or settings.openai_api_key
+        if not api_key:
+            raise ValueError("Either GEMINI_API_KEY or OPENAI_API_KEY must be set in the environment variables.")
+        
+        base_url = settings.openai_api_base
+        if settings.gemini_api_key and not base_url:
+            base_url = "https://generativelanguage.googleapis.com/v1beta/openai/"
+            
+        kwargs = {"api_key": api_key}
+        if base_url:
+            kwargs["base_url"] = base_url
+            
         _client = AsyncOpenAI(**kwargs)
     return _client

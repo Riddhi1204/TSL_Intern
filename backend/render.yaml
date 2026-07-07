@@ -25,11 +25,14 @@ services:
     healthCheckPath: /health
 
     envVars:
-      - key: OPENAI_API_KEY
+      - key: PYTHON_VERSION
+        value: 3.12.9
+
+      - key: GEMINI_API_KEY
         sync: false          # Must be set manually in the Render dashboard
 
       - key: MODEL_NAME
-        value: gpt-4o-mini   # Can be overridden in dashboard if needed
+        value: gemini-2.5-flash # Can be overridden in dashboard if needed
 
       - key: ALLOWED_ORIGINS
         sync: false          # Set to your Vercel frontend URL in the dashboard
