@@ -58,12 +58,13 @@ def create_app() -> FastAPI:
         redoc_url="/redoc",
     )
 
-    # Fix #9: Pass list[str] to allow_origins, not a raw comma-separated string.
+    # Allow wildcard origins since this is a public API without cookies/credentials.
+    # This prevents CORS-related "Network Error" on Vercel deployments.
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=settings.origins_list,
-        allow_credentials=True,
-        allow_methods=["GET", "POST", "OPTIONS"],
+        allow_origins=["*"],
+        allow_credentials=False,
+        allow_methods=["*"],
         allow_headers=["*"],
     )
 
