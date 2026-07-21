@@ -47,16 +47,26 @@ async def check_email(request: EmailCheckRequest) -> EmailCheckResponse:
     # Explicitly check each result for exceptions and surface them as HTTP errors.
     if isinstance(grammar_result, Exception):
         logger.error("Grammar service failed: %s", grammar_result, exc_info=grammar_result)
+        err_msg = str(grammar_result)
+        if "must be set" in err_msg or "API key" in err_msg:
+            detail_msg = "API Key Missing: Please configure GEMINI_API_KEY in your Render dashboard environment variables."
+        else:
+            detail_msg = f"Grammar analysis service failed: {err_msg}"
         raise HTTPException(
             status_code=502,
-            detail=f"Grammar analysis service failed: {str(grammar_result)}",
+            detail=detail_msg,
         )
 
     if isinstance(subject_result, Exception):
         logger.error("Subject service failed: %s", subject_result, exc_info=subject_result)
+        err_msg = str(subject_result)
+        if "must be set" in err_msg or "API key" in err_msg:
+            detail_msg = "API Key Missing: Please configure GEMINI_API_KEY in your Render dashboard environment variables."
+        else:
+            detail_msg = f"Subject generation service failed: {err_msg}"
         raise HTTPException(
             status_code=502,
-            detail=f"Subject generation service failed: {str(subject_result)}",
+            detail=detail_msg,
         )
 
     corrected_body, grammar_issues = grammar_result
