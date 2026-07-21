@@ -12,9 +12,10 @@ import logging
 
 from app.core.config import get_settings
 from app.schemas.response import GrammarIssue
-from app.services.ai.base import get_openai_client
+from app.services.ai.base import get_openai_client, create_chat_completion_with_fallback
 
 logger = logging.getLogger(__name__)
+
 
 # Fix #4: The system message MUST instruct the model to output JSON.
 # Without this instruction, response_format=json_object is ignored.
@@ -58,8 +59,7 @@ async def analyze_grammar(body: str) -> tuple[str, list[GrammarIssue]]:
 
     logger.info("Sending grammar analysis request to OpenAI (body_len=%d)", len(body))
 
-    response = await client.chat.completions.create(
-        model=settings.model_name,
+    response = await create_chat_completion_with_fallback(
         messages=[
             {"role": "system", "content": GRAMMAR_SYSTEM_PROMPT},
             {

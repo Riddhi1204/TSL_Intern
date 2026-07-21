@@ -12,7 +12,7 @@ import logging
 
 from app.core.config import get_settings
 from app.schemas.response import SubjectSuggestion
-from app.services.ai.base import get_openai_client
+from app.services.ai.base import get_openai_client, create_chat_completion_with_fallback
 
 logger = logging.getLogger(__name__)
 
@@ -63,8 +63,7 @@ async def generate_subjects(subject: str, body: str) -> list[SubjectSuggestion]:
 
     logger.info("Sending subject generation request to OpenAI")
 
-    response = await client.chat.completions.create(
-        model=settings.model_name,
+    response = await create_chat_completion_with_fallback(
         messages=[
             {"role": "system", "content": SUBJECT_SYSTEM_PROMPT},
             {
