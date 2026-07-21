@@ -49,14 +49,14 @@ async def check_email(request: EmailCheckRequest) -> EmailCheckResponse:
         logger.error("Grammar service failed: %s", grammar_result, exc_info=grammar_result)
         raise HTTPException(
             status_code=502,
-            detail="Grammar analysis service failed. Please try again.",
+            detail=f"Grammar analysis service failed: {str(grammar_result)}",
         )
 
     if isinstance(subject_result, Exception):
         logger.error("Subject service failed: %s", subject_result, exc_info=subject_result)
         raise HTTPException(
             status_code=502,
-            detail="Subject generation service failed. Please try again.",
+            detail=f"Subject generation service failed: {str(subject_result)}",
         )
 
     corrected_body, grammar_issues = grammar_result
